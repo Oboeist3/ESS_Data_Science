@@ -2,7 +2,7 @@ setwd("~/Documents/Spring 2025/MATH 4322 - Data Science /Group Project/Cleaned D
 install.packages("MASS")
 library(MASS)
 
-## Delete your art
+## Delete your art 
 rm(list = ls())
 
 ## Loading datasets
@@ -83,19 +83,19 @@ west_central_2$trstsci <- as.factor(west_central_2$trstsci)
 ## Low, Medium, High Partition for implvdm
 
 central_2$dem_imp <- ifelse(central_2$implvdm < 5, "Low", 
-                           ifelse(central_2$implvdm >= 8, "High", "Medium"))
+                           ifelse(central_2$implvdm >= 7, "High", "Medium"))
 eastern_2$dem_imp <- ifelse(eastern_2$implvdm < 5, "Low", 
-                            ifelse(eastern_2$implvdm >= 8, "High", "Medium"))
+                            ifelse(eastern_2$implvdm >= 7, "High", "Medium"))
 nordics_2$dem_imp <- ifelse(nordics_2$implvdm < 5, "Low", 
-                            ifelse(nordics_2$implvdm >= 8, "High", "Medium"))
+                            ifelse(nordics_2$implvdm >= 7, "High", "Medium"))
 southern_2$dem_imp <- ifelse(southern_2$implvdm < 5, "Low", 
-                            ifelse(southern_2$implvdm >= 8, "High", "Medium"))
+                            ifelse(southern_2$implvdm >= 7, "High", "Medium"))
 uk_2$dem_imp <- ifelse(uk_2$implvdm < 5, "Low", 
-                            ifelse(uk_2$implvdm >= 8, "High", "Medium"))
+                            ifelse(uk_2$implvdm >= 7, "High", "Medium"))
 west_central_2$dem_imp <- ifelse(west_central_2$implvdm < 5, "Low", 
-                            ifelse(west_central_2$implvdm >= 8, "High", "Medium"))
+                            ifelse(west_central_2$implvdm >= 7, "High", "Medium"))
 
-## Remove implvdm as factor
+## Remove implvdm and country as factors
 central_2$implvdm <- NULL
 eastern_2$implvdm <- NULL
 nordics_2$implvdm <- NULL
@@ -103,6 +103,12 @@ southern_2$implvdm <- NULL
 uk_2$implvdm <- NULL
 west_central_2$implvdm <- NULL
 
+central_2$cntry <- NULL
+eastern_2$cntry <- NULL
+nordics_2$cntry <- NULL
+southern_2$cntry <- NULL
+uk_2$cntry <- NULL
+west_central_2$cntry <- NULL
 
 ## Split Into Testing and Training Data
 central_2_index <- sample(1:nrow(central_2), size = 0.7 * nrow(central_2))
@@ -152,6 +158,82 @@ nordics_confusion <- table(nordics.lda.pred$class,nordics_2_test$dem_imp)
 southern_confusion <- table(southern.lda.pred$class,southern_2_test$dem_imp)
 uk_confusion <- table(uk.lda.pred$class,uk_2_test$dem_imp)
 west_central_confusion <- table(west_central.lda.pred$class,west_central_2_test$dem_imp)
+
+print(central_confusion)
+print(eastern_confusion)
+print(nordics_confusion)
+print(southern_confusion)
+print(uk_confusion)
+print(west_central_confusion)
+
+## Accuracy Rate
+
+correct_central <- sum(diag(central_confusion))
+total_central <- sum(central_confusion)
+accuracy_central <- correct_central / total_central
+
+correct_eastern <- sum(diag(eastern_confusion))
+total_eastern <- sum(eastern_confusion)
+accuracy_eastern <- correct_eastern / total_eastern
+
+correct_nordics <- sum(diag(nordics_confusion))
+total_nordics <- sum(nordics_confusion)
+accuracy_nordics <- correct_nordics / total_nordics
+
+correct_southern <- sum(diag(southern_confusion))
+total_southern <- sum(southern_confusion)
+accuracy_southern <- correct_southern / total_southern
+
+correct_uk <- sum(diag(uk_confusion))
+total_uk <- sum(uk_confusion)
+accuracy_uk <- correct_uk / total_uk
+
+correct_west_central <- sum(diag(west_central_confusion))
+total_west_central <- sum(west_central_confusion)
+accuracy_west_central <- correct_west_central / total_west_central
+
+accuracies <- c(Central = accuracy_central, Eastern = accuracy_eastern, Nordics = accuracy_nordics, Southern = accuracy_southern, 
+                UK = accuracy_uk, Western_Continental = accuracy_west_central)
+print(round(accuracies, 4))
+
+## Relative importance of variables LD1
+
+central_importance <- abs(central.lda$scaling[, 1])
+central_importance_sorted <- sort(central_importance, decreasing = TRUE)
+print(central_importance_sorted)
+
+eastern_importance <- abs(eastern.lda$scaling[, 1])
+eastern_importance_sorted <- sort(eastern_importance, decreasing = TRUE)
+print(eastern_importance_sorted)
+
+nordics_importance <- abs(nordics.lda$scaling[, 1])
+nordics_importance_sorted <- sort(nordics_importance, decreasing = TRUE)
+print(nordics_importance_sorted)
+
+southern_importance <- abs(southern.lda$scaling[, 1])
+southern_importance_sorted <- sort(southern_importance, decreasing = TRUE)
+print(southern_importance_sorted)
+
+uk_importance <- abs(uk.lda$scaling[, 1])
+uk_importance_sorted <- sort(uk_importance, decreasing = TRUE)
+print(uk_importance_sorted)
+
+west_central_importance <- abs(west_central.lda$scaling[, 1])
+west_central_importance_sorted <- sort(west_central_importance, decreasing = TRUE)
+print(west_central_importance_sorted)
+
+## Graphing of relative importance of variables by LD1
+
+par(mfrow = c(2, 3), mar = c(6, 4, 4, 2)) 
+
+barplot(central_importance_sorted, las = 2, col = "steelblue", main = "Central", ylab = "Abs Coefficient")
+barplot(eastern_importance_sorted, las = 2, col = "darkorange", main = "Eastern", ylab = "Abs Coefficient")
+barplot(nordics_importance_sorted, las = 2, col = "seagreen", main = "Nordics", ylab = "Abs Coefficient")
+barplot(southern_importance_sorted, las = 2, col = "tomato", main = "Southern", ylab = "Abs Coefficient")
+barplot(uk_importance_sorted, las = 2, col = "darkviolet", main = "UK", ylab = "Abs Coefficient")
+barplot(west_central_importance_sorted, las = 2, col = "goldenrod", main = "Western Continental", ylab = "Abs Coefficient")
+
+par(mfrow = c(1, 1))
 
 ## K-Fold Cross Validation Function (Scrappy_Jet)
 kfold_lda <- function(data, target_col, k = 5) {
